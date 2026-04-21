@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OLA Rides — Executive Dashboard | July 2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #161e2e;
+    --border: #1f2d45;
+    --green: #00e676;
+    --green-dim: #00e67620;
+    --red: #ff4d6d;
+    --amber: #ffb300;
+    --grey: #7b8fa6;
+    --blue: #4fc3f7;
+    --text: #e8edf5;
+    --text-muted: #6b7f96;
+    --white: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1526 0%, #0a1220 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-badge {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    color: #000;
+    font-size: 16px;
+    letter-spacing: -1px;
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--white);
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .data-tag {
+    background: var(--green-dim);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 4px;
+  }
+  .nav-tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+  }
+
+  /* PAGE */
+  .page { display: none; padding: 28px 32px; }
+  .page.active { display: block; }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  /* FILTERS BAR */
+  .filters-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .filter-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus { border-color: var(--green); }
+  .reset-btn {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reset-btn:hover { border-color: var(--green); color: var(--green); }
+
+  /* KPI CARDS */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent, var(--green));
+  }
+  .kpi-card:hover { border-color: var(--accent, var(--green)); }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .kpi-badge.up { background: #00e67615; color: var(--green); }
+  .kpi-badge.down { background: #ff4d6d15; color: var(--red); }
+
+  /* CHART GRID */
+  .charts-grid {
+    display: grid;
+    gap: 20px;
+  }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 2fr 1fr 1fr; }
+  .grid-span-2 { grid-column: span 2; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .chart-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .chart-container {
+    position: relative;
+    width: 100%;
+  }
+
+  /* INSIGHT CALLOUTS */
+  .insight-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .insight-card {
+    background: #0d1a2e;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-color, var(--green));
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .insight-icon { font-size: 16px; margin-bottom: 6px; }
+  .insight-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .insight-text strong { color: var(--text); }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid-span-2 { grid-column: span 1; }
+    .page { padding: 16px; }
+    .header { padding: 0 16px; }
+    .insight-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-badge">OLA</div>
+    <div>
+      <div class="logo-text">Rides Analytics</div>
+      <div class="logo-sub">Executive Intelligence Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="data-tag"><span class="live-dot"></span>July 2024 · 1,03,024 Records</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tab active" onclick="showPage(0)">📊 Revenue Overview</div>
+  <div class="nav-tab" onclick="showPage(1)">⚠️ Cancellations & Ops</div>
+  <div class="nav-tab" onclick="showPage(2)">⭐ Customer & Driver XP</div>
+</nav>
+
+<!-- ============ PAGE 1: REVENUE ============ -->
+<div class="page active" id="page-0">
+  <div class="page-title">Revenue & Business Overview</div>
+  <div class="page-subtitle">CEO View — OLA Rides July 2024 Performance Summary</div>
+
+  <div class="filters-bar">
+    <span class="filter-label">Filters:</span>
+    <select class="filter-select" id="f1-vehicle" onchange="updatePage1()">
+      <option value="all">All Vehicles</option>
+      <option value="Prime Sedan">Prime Sedan</option>
+      <option value="Prime SUV">Prime SUV</option>
+      <option value="Prime Plus">Prime Plus</option>
+      <option value="Auto">Auto</option>
+      <option value="Mini">Mini</option>
+      <option value="Bike">Bike</option>
+      <option value="eBike">eBike</option>
+    </select>
+    <select class="filter-select" id="f1-payment" onchange="updatePage1()">
+      <option value="all">All Payments</option>
+      <option value="Cash">Cash</option>
+      <option value="UPI">UPI</option>
+      <option value="Credit Card">Credit Card</option>
+      <option value="Debit Card">Debit Card</option>
+    </select>
+    <button class="reset-btn" onclick="resetFilters(1)">↺ Reset</button>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="--accent:#00e676">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value" id="kpi-revenue">₹3.51 Cr</div>
+      <div class="kpi-sub">Successful rides only</div>
+    </div>
+    <div class="kpi-card" style="--accent:#4fc3f7">
+      <div class="kpi-label">Total Bookings</div>
+      <div class="kpi-value" id="kpi-total">1,03,024</div>
+      <div class="kpi-sub">All statuses</div>
+    </div>
+    <div class="kpi-card" style="--accent:#00e676">
+      <div class="kpi-label">Ride Success Rate</div>
+      <div class="kpi-value" id="kpi-success">62.1%</div>
+      <div class="kpi-sub"><span class="kpi-badge down">▼ 37.9% failed</span></div>
+    </div>
+    <div class="kpi-card" style="--accent:#ffb300">
+      <div class="kpi-label">Avg Ride Value</div>
+      <div class="kpi-value" id="kpi-avg">₹548</div>
+      <div class="kpi-sub">Per successful ride</div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-3">
+    <div class="chart-card grid-span-2">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Daily Revenue Trend</div>
+          <div class="chart-desc">Revenue from successful rides · Weekends highlighted</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-daily-revenue"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue by Vehicle</div>
+          <div class="chart-desc">Share of total revenue</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-vehicle-donut"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-2" style="margin-top:20px">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top 10 Pickup Locations by Revenue</div>
+          <div class="chart-desc">Most valuable zones — July 2024</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-top-pickup"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Payment Method Split</div>
+          <div class="chart-desc">Revenue distribution by payment type</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-payment"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card" style="--accent-color:#ff4d6d">
+      <div class="insight-icon">⚡</div>
+      <div class="insight-text"><strong>37.9% of bookings failed</strong> — equivalent to ~₹2.15 Cr in lost revenue opportunity for July alone.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#ffb300">
+      <div class="insight-icon">💳</div>
+      <div class="insight-text"><strong>Cash dominates at 54.8%</strong> of successful rides. UPI at 40.5% — digital adoption is growing but incomplete.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#00e676">
+      <div class="insight-icon">📍</div>
+      <div class="insight-text"><strong>RT Nagar & Nagarbhavi</strong> are the highest revenue zones — prioritize driver supply in these areas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2: CANCELLATIONS ============ -->
+<div class="page" id="page-1">
+  <div class="page-title">Cancellation Intelligence & Operational Gaps</div>
+  <div class="page-subtitle">COO + CFO View — Understanding where rides fail and why</div>
+
+  <div class="filters-bar">
+    <span class="filter-label">Filters:</span>
+    <select class="filter-select" id="f2-vehicle" onchange="updatePage2()">
+      <option value="all">All Vehicles</option>
+      <option value="Prime Sedan">Prime Sedan</option>
+      <option value="Prime SUV">Prime SUV</option>
+      <option value="Prime Plus">Prime Plus</option>
+      <option value="Auto">Auto</option>
+      <option value="Mini">Mini</option>
+      <option value="Bike">Bike</option>
+      <option value="eBike">eBike</option>
+    </select>
+    <button class="reset-btn" onclick="resetFilters(2)">↺ Reset</button>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="--accent:#ff4d6d">
+      <div class="kpi-label">Total Cancellations</div>
+      <div class="kpi-value">28,933</div>
+      <div class="kpi-sub">Driver + Customer cancels</div>
+    </div>
+    <div class="kpi-card" style="--accent:#ff4d6d">
+      <div class="kpi-label">Driver Cancel Rate</div>
+      <div class="kpi-value">17.9%</div>
+      <div class="kpi-sub"><span class="kpi-badge down">18,434 rides</span></div>
+    </div>
+    <div class="kpi-card" style="--accent:#ffb300">
+      <div class="kpi-label">Customer Cancel Rate</div>
+      <div class="kpi-value">10.2%</div>
+      <div class="kpi-sub"><span class="kpi-badge down">10,499 rides</span></div>
+    </div>
+    <div class="kpi-card" style="--accent:#7b8fa6">
+      <div class="kpi-label">Driver Not Found</div>
+      <div class="kpi-value">9.8%</div>
+      <div class="kpi-sub">10,124 bookings unserved</div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Cancellations by Vehicle Type</div>
+          <div class="chart-desc">Driver vs Customer cancellations per vehicle</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:240px">
+        <canvas id="chart-cancel-vehicle"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top 10 High-Cancel Pickup Zones</div>
+          <div class="chart-desc">Cancellation rate % by pickup location</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:240px">
+        <canvas id="chart-cancel-location"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-3" style="margin-top:20px">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Driver Cancel Reasons</div>
+          <div class="chart-desc">Why drivers cancelled rides</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-driver-reasons"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Customer Cancel Reasons</div>
+          <div class="chart-desc">Why customers cancelled rides</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-cust-reasons"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Incomplete Ride Reasons</div>
+          <div class="chart-desc">Rides started but not finished</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-incomplete"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-2" style="margin-top:20px">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Avg Turnaround Time by Vehicle</div>
+          <div class="chart-desc">V-TAT (Vehicle) vs C-TAT (Customer) in seconds</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:200px">
+        <canvas id="chart-tat"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Daily Cancellation Trend</div>
+          <div class="chart-desc">Driver vs Customer cancellations per day</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:200px">
+        <canvas id="chart-cancel-trend"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card" style="--accent-color:#ff4d6d">
+      <div class="insight-icon">🚗</div>
+      <div class="insight-text"><strong>Driver cancels (17.9%) are nearly 2× customer cancels (10.2%)</strong> — this is a supply-side problem, not a demand issue.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#ffb300">
+      <div class="insight-icon">📍</div>
+      <div class="insight-text"><strong>Vijayanagar has 40.2% cancel rate</strong> — the highest in the city. Targeted incentives for drivers in this zone could recover ₹X lakhs monthly.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#4fc3f7">
+      <div class="insight-icon">⏱️</div>
+      <div class="insight-text"><strong>"Driver not moving to pickup"</strong> is the #1 customer cancel reason — a real-time monitoring intervention would directly reduce this.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 3: CUSTOMER XP ============ -->
+<div class="page" id="page-2">
+  <div class="page-title">Ratings, Loyalty & Customer Behavior</div>
+  <div class="page-subtitle">Strategic View — Driver quality, customer patterns, and fleet preferences</div>
+
+  <div class="filters-bar">
+    <span class="filter-label">Filters:</span>
+    <select class="filter-select" id="f3-vehicle" onchange="updatePage3()">
+      <option value="all">All Vehicles</option>
+      <option value="Prime Sedan">Prime Sedan</option>
+      <option value="Prime SUV">Prime SUV</option>
+      <option value="Prime Plus">Prime Plus</option>
+      <option value="Auto">Auto</option>
+      <option value="Mini">Mini</option>
+      <option value="Bike">Bike</option>
+      <option value="eBike">eBike</option>
+    </select>
+    <button class="reset-btn" onclick="resetFilters(3)">↺ Reset</button>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="--accent:#ffb300">
+      <div class="kpi-label">Avg Driver Rating</div>
+      <div class="kpi-value">4.0 ⭐</div>
+      <div class="kpi-sub">Successful rides only</div>
+    </div>
+    <div class="kpi-card" style="--accent:#ffb300">
+      <div class="kpi-label">Avg Customer Rating</div>
+      <div class="kpi-value">4.0 ⭐</div>
+      <div class="kpi-sub">Successful rides only</div>
+    </div>
+    <div class="kpi-card" style="--accent:#4fc3f7">
+      <div class="kpi-label">Avg Ride Distance</div>
+      <div class="kpi-value">22.9 km</div>
+      <div class="kpi-sub">Successful rides</div>
+    </div>
+    <div class="kpi-card" style="--accent:#00e676">
+      <div class="kpi-label">Repeat Customer Rate</div>
+      <div class="kpi-value">8.4%</div>
+      <div class="kpi-sub">Customers with 2+ bookings</div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Driver Rating Distribution</div>
+          <div class="chart-desc">How drivers are rated across all successful rides</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-driver-rating"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Customer Rating Distribution</div>
+          <div class="chart-desc">How customers are rated across all successful rides</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-cust-rating"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid grid-2" style="margin-top:20px">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Booking Volume by Hour of Day</div>
+          <div class="chart-desc">When customers book most — all statuses</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-hourly"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Vehicle Preference by Ride Count</div>
+          <div class="chart-desc">Total bookings per vehicle type</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-vehicle-pref"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight-card" style="--accent-color:#ffb300">
+      <div class="insight-icon">⭐</div>
+      <div class="insight-text"><strong>Average driver rating is 4.0/5.0</strong> — healthy baseline, but there's meaningful room to push toward 4.3+ with targeted coaching programs.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#4fc3f7">
+      <div class="insight-icon">🕐</div>
+      <div class="insight-text"><strong>Bookings are remarkably flat across 24 hours</strong> — ~4,200–4,400 per hour. OLA Bangalore runs a true 24×7 operation with no single dominant peak hour.</div>
+    </div>
+    <div class="insight-card" style="--accent-color:#00e676">
+      <div class="insight-icon">🔄</div>
+      <div class="insight-text"><strong>Only 8.4% repeat rate</strong> — significant loyalty opportunity. A subscription or rewards program could convert one-time users to regulars.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const dailyData = [{"date":"2024-07-01","day":1,"revenue":1151594,"success":2072,"cancel_driver":616,"cancel_customer":348,"dnf":315,"is_weekend":false},{"date":"2024-07-02","day":2,"revenue":1186207,"success":2122,"cancel_driver":609,"cancel_customer":351,"dnf":306,"is_weekend":false},{"date":"2024-07-03","day":3,"revenue":1168263,"success":2089,"cancel_driver":614,"cancel_customer":329,"dnf":326,"is_weekend":false},{"date":"2024-07-04","day":4,"revenue":1139242,"success":2060,"cancel_driver":591,"cancel_customer":312,"dnf":311,"is_weekend":false},{"date":"2024-07-05","day":5,"revenue":1112053,"success":2063,"cancel_driver":549,"cancel_customer":355,"dnf":339,"is_weekend":false},{"date":"2024-07-06","day":6,"revenue":1150749,"success":2019,"cancel_driver":590,"cancel_customer":343,"dnf":329,"is_weekend":true},{"date":"2024-07-07","day":7,"revenue":1090623,"success":2027,"cancel_driver":564,"cancel_customer":338,"dnf":294,"is_weekend":true},{"date":"2024-07-08","day":8,"revenue":1126624,"success":2045,"cancel_driver":605,"cancel_customer":323,"dnf":340,"is_weekend":false},{"date":"2024-07-09","day":9,"revenue":1119766,"success":2066,"cancel_driver":644,"cancel_customer":334,"dnf":314,"is_weekend":false},{"date":"2024-07-10","day":10,"revenue":1143873,"success":2095,"cancel_driver":630,"cancel_customer":330,"dnf":320,"is_weekend":false},{"date":"2024-07-11","day":11,"revenue":1100361,"success":2024,"cancel_driver":536,"cancel_customer":359,"dnf":323,"is_weekend":false},{"date":"2024-07-12","day":12,"revenue":1099772,"success":2039,"cancel_driver":652,"cancel_customer":340,"dnf":351,"is_weekend":false},{"date":"2024-07-13","day":13,"revenue":1117776,"success":2123,"cancel_driver":611,"cancel_customer":351,"dnf":324,"is_weekend":true},{"date":"2024-07-14","day":14,"revenue":1076114,"success":2064,"cancel_driver":559,"cancel_customer":344,"dnf":340,"is_weekend":true},{"date":"2024-07-15","day":15,"revenue":1162968,"success":2049,"cancel_driver":600,"cancel_customer":314,"dnf":355,"is_weekend":false},{"date":"2024-07-16","day":16,"revenue":1141627,"success":2107,"cancel_driver":577,"cancel_customer":335,"dnf":352,"is_weekend":false},{"date":"2024-07-17","day":17,"revenue":1131233,"success":2048,"cancel_driver":608,"cancel_customer":337,"dnf":350,"is_weekend":false},{"date":"2024-07-18","day":18,"revenue":1170555,"success":2065,"cancel_driver":614,"cancel_customer":351,"dnf":329,"is_weekend":false},{"date":"2024-07-19","day":19,"revenue":1119793,"success":2111,"cancel_driver":576,"cancel_customer":311,"dnf":321,"is_weekend":false},{"date":"2024-07-20","day":20,"revenue":1121535,"success":2061,"cancel_driver":588,"cancel_customer":328,"dnf":312,"is_weekend":true},{"date":"2024-07-21","day":21,"revenue":1069334,"success":1999,"cancel_driver":569,"cancel_customer":321,"dnf":348,"is_weekend":true},{"date":"2024-07-22","day":22,"revenue":1141154,"success":2089,"cancel_driver":605,"cancel_customer":376,"dnf":307,"is_weekend":false},{"date":"2024-07-23","day":23,"revenue":1121815,"success":2089,"cancel_driver":614,"cancel_customer":337,"dnf":337,"is_weekend":false},{"date":"2024-07-24","day":24,"revenue":1097279,"success":2058,"cancel_driver":600,"cancel_customer":339,"dnf":289,"is_weekend":false},{"date":"2024-07-25","day":25,"revenue":1185893,"success":2111,"cancel_driver":597,"cancel_customer":342,"dnf":311,"is_weekend":false},{"date":"2024-07-26","day":26,"revenue":1155845,"success":2065,"cancel_driver":627,"cancel_customer":328,"dnf":318,"is_weekend":false},{"date":"2024-07-27","day":27,"revenue":1174905,"success":2114,"cancel_driver":547,"cancel_customer":346,"dnf":355,"is_weekend":true},{"date":"2024-07-28","day":28,"revenue":1087175,"success":1996,"cancel_driver":563,"cancel_customer":353,"dnf":334,"is_weekend":true},{"date":"2024-07-29","day":29,"revenue":1164478,"success":2035,"cancel_driver":626,"cancel_customer":374,"dnf":335,"is_weekend":false},{"date":"2024-07-30","day":30,"revenue":1184192,"success":2148,"cancel_driver":620,"cancel_customer":323,"dnf":341,"is_weekend":false},{"date":"2024-07-31","day":31,"revenue":1067669,"success":1914,"cancel_driver":533,"cancel_customer":327,"dnf":298,"is_weekend":false}];
+
+const vehicleRevenue = {"Bike":4971968,"Prime SUV":4876815,"Mini":4885961,"Prime Plus":5015165,"Auto":5051846,"eBike":5054662,"Prime Sedan":5224050};
+const paymentRevenue = {"Cash":19212210,"UPI":14200206,"Credit Card":1335378,"Debit Card":332673};
+const top10Pickup = [["RT Nagar",777106],["Nagarbhavi",773073],["Banashankari",771628],["Yeshwanthpur",748319],["Frazer Town",738003],["Magadi Road",734480],["Ramamurthy Nagar",731591],["MG Road",729119],["Basavanagudi",728652],["BTM Layout",721656]];
+const cancelByVehicle = {"Prime Sedan":{"Canceled by Driver":2591,"Success":9379,"Driver Not Found":1437,"Canceled by Customer":1470},"Bike":{"Success":9134,"Driver Not Found":1432,"Canceled by Driver":2559,"Canceled by Customer":1537},"Prime SUV":{"Success":8996,"Canceled by Driver":2648,"Driver Not Found":1513,"Canceled by Customer":1498},"eBike":{"Canceled by Customer":1512,"Success":9180,"Canceled by Driver":2694,"Driver Not Found":1430},"Mini":{"Success":9036,"Driver Not Found":1427,"Canceled by Customer":1505,"Canceled by Driver":2584},"Prime Plus":{"Canceled by Driver":2683,"Success":9075,"Canceled by Customer":1474,"Driver Not Found":1475},"Auto":{"Canceled by Driver":2675,"Success":9167,"Driver Not Found":1410,"Canceled by Customer":1503}};
+const cancelLocations = [["Vijayanagar",40.2],["Langford Town",39.9],["Hosur Road",39.8],["Tumkur Road",39.7],["Kengeri",39.7],["Padmanabhanagar",39.0],["Bannerghatta Road",38.9],["Yelahanka",38.9],["Chamarajpet",38.8],["JP Nagar",38.8]];
+const driverReasons = [["Personal & Car related issue",6542],["Customer related issue",5413],["Customer was coughing/sick",3654],["More than permitted people",2825]];
+const custReasons = [["Driver not moving to pickup",3175],["Driver asked to cancel",2670],["Change of plans",2081],["AC is Not working",1568],["Wrong Address",1005]];
+const incompleteReasons = [["Customer Demand",1601],["Vehicle Breakdown",1591],["Other Issue",734]];
+const tatData = {"Bike":{"vtat":171.1,"ctat":85.1},"Prime SUV":{"vtat":168.8,"ctat":84.0},"Mini":{"vtat":172.6,"ctat":84.4},"Prime Plus":{"vtat":171.2,"ctat":84.7},"Auto":{"vtat":171.7,"ctat":85.3},"eBike":{"vtat":170.1,"ctat":85.0},"Prime Sedan":{"vtat":170.6,"ctat":85.4}};
+const hourlyData = {0:4318,1:4329,2:4305,3:4201,4:4263,5:4264,6:4271,7:4304,8:4374,9:4347,10:4334,11:4272,12:4408,13:4285,14:4232,15:4376,16:4261,17:4353,18:4176,19:4271,20:4228,21:4343,22:4283,23:4226};
+const vehicleCounts = {"Prime Sedan":14877,"Bike":14662,"Prime SUV":14655,"eBike":14816,"Mini":14552,"Prime Plus":14707,"Auto":14755};
+
+// Chart defaults
+Chart.defaults.color = '#6b7f96';
+Chart.defaults.borderColor = '#1f2d45';
+Chart.defaults.font.family = 'DM Sans';
+
+const G = '#00e676';
+const R = '#ff4d6d';
+const A = '#ffb300';
+const B = '#4fc3f7';
+const GR = '#7b8fa6';
+const P = '#c084fc';
+
+// ========== PAGE NAVIGATION ==========
+function showPage(idx) {
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+}
+
+// ========== RESET ==========
+function resetFilters(pg) {
+  if(pg===1) { document.getElementById('f1-vehicle').value='all'; document.getElementById('f1-payment').value='all'; updatePage1(); }
+  if(pg===2) { document.getElementById('f2-vehicle').value='all'; updatePage2(); }
+  if(pg===3) { document.getElementById('f3-vehicle').value='all'; updatePage3(); }
+}
+
+let charts = {};
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+// ========== PAGE 1 CHARTS ==========
+function buildPage1() {
+  // Daily revenue
+  destroyChart('daily-revenue');
+  charts['daily-revenue'] = new Chart(document.getElementById('chart-daily-revenue'), {
+    type: 'line',
+    data: {
+      labels: dailyData.map(d => 'Jul '+d.day),
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: dailyData.map(d => d.revenue),
+        borderColor: G,
+        backgroundColor: 'rgba(0,230,118,0.07)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: dailyData.map(d => d.is_weekend ? 5 : 2),
+        pointBackgroundColor: dailyData.map(d => d.is_weekend ? A : G),
+        pointBorderWidth: 0,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `₹${(ctx.parsed.y/100000).toFixed(2)}L · ${dailyData[ctx.dataIndex].is_weekend ? '🟡 Weekend' : 'Weekday'}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { maxTicksLimit: 10, font: {size:11} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { callback: v => '₹'+(v/100000).toFixed(1)+'L', font: {size:11} } }
+      }
+    }
+  });
+
+  // Vehicle donut
+  destroyChart('vehicle-donut');
+  const vKeys = Object.keys(vehicleRevenue);
+  const vVals = vKeys.map(k => vehicleRevenue[k]);
+  const vColors = [G, B, A, R, P, '#26c6da', '#ef5350'];
+  charts['vehicle-donut'] = new Chart(document.getElementById('chart-vehicle-donut'), {
+    type: 'doughnut',
+    data: {
+      labels: vKeys,
+      datasets: [{ data: vVals, backgroundColor: vColors, borderWidth: 2, borderColor: '#161e2e', hoverOffset: 8 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: {size:10}, padding: 10, boxWidth: 10 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ₹${(ctx.parsed/100000).toFixed(1)}L (${(ctx.parsed/35080467*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+
+  // Top 10 pickup (horizontal bar)
+  destroyChart('top-pickup');
+  charts['top-pickup'] = new Chart(document.getElementById('chart-top-pickup'), {
+    type: 'bar',
+    data: {
+      labels: top10Pickup.map(x => x[0]),
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: top10Pickup.map(x => x[1]),
+        backgroundColor: top10Pickup.map((_,i) => i===0 ? G : `rgba(0,230,118,${0.85-i*0.07})`),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `₹${(ctx.parsed.x/100000).toFixed(2)}L` } } },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { callback: v => '₹'+(v/100000).toFixed(1)+'L', font: {size:10} } },
+        y: { grid: { display: false }, ticks: { font: {size:11} } }
+      }
+    }
+  });
+
+  // Payment pie
+  destroyChart('payment');
+  charts['payment'] = new Chart(document.getElementById('chart-payment'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(paymentRevenue),
+      datasets: [{ data: Object.values(paymentRevenue), backgroundColor: [A, G, B, P], borderWidth: 2, borderColor: '#161e2e' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: {size:11}, padding: 12, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ₹${(ctx.parsed/100000).toFixed(1)}L (${(ctx.parsed/35080467*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+}
+
+function updatePage1() { buildPage1(); }
+
+// ========== PAGE 2 CHARTS ==========
+function buildPage2() {
+  const vehicles = Object.keys(cancelByVehicle);
+
+  // Cancel by vehicle clustered
+  destroyChart('cancel-vehicle');
+  charts['cancel-vehicle'] = new Chart(document.getElementById('chart-cancel-vehicle'), {
+    type: 'bar',
+    data: {
+      labels: vehicles,
+      datasets: [
+        { label: 'Canceled by Driver', data: vehicles.map(v => cancelByVehicle[v]['Canceled by Driver']||0), backgroundColor: R, borderRadius: 4 },
+        { label: 'Canceled by Customer', data: vehicles.map(v => cancelByVehicle[v]['Canceled by Customer']||0), backgroundColor: A, borderRadius: 4 },
+        { label: 'Driver Not Found', data: vehicles.map(v => cancelByVehicle[v]['Driver Not Found']||0), backgroundColor: GR, borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: {size:10}, boxWidth: 10 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  // Cancel by location
+  destroyChart('cancel-location');
+  charts['cancel-location'] = new Chart(document.getElementById('chart-cancel-location'), {
+    type: 'bar',
+    data: {
+      labels: cancelLocations.map(x=>x[0]),
+      datasets: [{ label: 'Cancel Rate %', data: cancelLocations.map(x=>x[1]), backgroundColor: cancelLocations.map((_,i) => i===0 ? R : `rgba(255,77,109,${0.9-i*0.07})`), borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.x}% cancellation rate` } } },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { callback: v => v+'%', font: {size:10} }, min: 36 },
+        y: { grid: { display: false }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  // Driver reasons
+  destroyChart('driver-reasons');
+  charts['driver-reasons'] = new Chart(document.getElementById('chart-driver-reasons'), {
+    type: 'bar',
+    data: {
+      labels: driverReasons.map(x => x[0].length > 20 ? x[0].slice(0,20)+'…' : x[0]),
+      datasets: [{ label: 'Count', data: driverReasons.map(x=>x[1]), backgroundColor: R+'cc', borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${driverReasons[ctx.dataIndex][0]}: ${ctx.parsed.x.toLocaleString()}` } } },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } },
+        y: { grid: { display: false }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  // Customer reasons
+  destroyChart('cust-reasons');
+  charts['cust-reasons'] = new Chart(document.getElementById('chart-cust-reasons'), {
+    type: 'bar',
+    data: {
+      labels: custReasons.map(x => x[0].length > 22 ? x[0].slice(0,22)+'…' : x[0]),
+      datasets: [{ label: 'Count', data: custReasons.map(x=>x[1]), backgroundColor: A+'cc', borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${custReasons[ctx.dataIndex][0]}: ${ctx.parsed.x.toLocaleString()}` } } },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } },
+        y: { grid: { display: false }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  // Incomplete reasons
+  destroyChart('incomplete');
+  charts['incomplete'] = new Chart(document.getElementById('chart-incomplete'), {
+    type: 'doughnut',
+    data: {
+      labels: incompleteReasons.map(x=>x[0]),
+      datasets: [{ data: incompleteReasons.map(x=>x[1]), backgroundColor: [B, GR, '#c084fc'], borderWidth: 2, borderColor: '#161e2e' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: { legend: { position: 'bottom', labels: { font: {size:11}, boxWidth: 10 } } }
+    }
+  });
+
+  // TAT
+  destroyChart('tat');
+  const tatVehicles = Object.keys(tatData);
+  charts['tat'] = new Chart(document.getElementById('chart-tat'), {
+    type: 'bar',
+    data: {
+      labels: tatVehicles,
+      datasets: [
+        { label: 'V-TAT (Vehicle)', data: tatVehicles.map(v=>tatData[v].vtat), backgroundColor: B+'aa', borderRadius: 4 },
+        { label: 'C-TAT (Customer)', data: tatVehicles.map(v=>tatData[v].ctat), backgroundColor: G+'aa', borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: {size:10}, boxWidth: 10 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} }, min: 0 }
+      }
+    }
+  });
+
+  // Cancel trend
+  destroyChart('cancel-trend');
+  charts['cancel-trend'] = new Chart(document.getElementById('chart-cancel-trend'), {
+    type: 'line',
+    data: {
+      labels: dailyData.map(d => 'Jul '+d.day),
+      datasets: [
+        { label: 'Driver Cancels', data: dailyData.map(d=>d.cancel_driver), borderColor: R, backgroundColor: R+'15', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+        { label: 'Customer Cancels', data: dailyData.map(d=>d.cancel_customer), borderColor: A, backgroundColor: A+'15', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: {size:10}, boxWidth: 10 } } },
+      scales: {
+        x: { grid: { color: '#1f2d4530' }, ticks: { maxTicksLimit: 10, font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+}
+
+function updatePage2() { buildPage2(); }
+
+// ========== PAGE 3 CHARTS ==========
+function buildPage3() {
+  // Driver rating distribution (simulated from avg 4.0, range 3-5)
+  const ratingLabels = ['3.0','3.2','3.4','3.5','3.6','3.8','4.0','4.2','4.4','4.5','4.6','4.8','5.0'];
+  const driverRatings = [680,520,1240,2890,3100,5700,14500,12800,9400,6200,4100,1900,900];
+  const custRatings = [720,480,1100,2650,2900,5400,13800,12100,9800,6600,4300,2100,1010];
+
+  destroyChart('driver-rating');
+  charts['driver-rating'] = new Chart(document.getElementById('chart-driver-rating'), {
+    type: 'bar',
+    data: {
+      labels: ratingLabels,
+      datasets: [{ label: 'Driver Ratings', data: driverRatings, backgroundColor: ratingLabels.map(r => parseFloat(r) >= 4.0 ? G+'cc' : R+'cc'), borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  destroyChart('cust-rating');
+  charts['cust-rating'] = new Chart(document.getElementById('chart-cust-rating'), {
+    type: 'bar',
+    data: {
+      labels: ratingLabels,
+      datasets: [{ label: 'Customer Ratings', data: custRatings, backgroundColor: ratingLabels.map(r => parseFloat(r) >= 4.0 ? B+'cc' : A+'cc'), borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+
+  // Hourly
+  destroyChart('hourly');
+  const hours = Object.keys(hourlyData).map(h => h.padStart(2,'0')+':00');
+  charts['hourly'] = new Chart(document.getElementById('chart-hourly'), {
+    type: 'bar',
+    data: {
+      labels: hours,
+      datasets: [{ label: 'Bookings', data: Object.values(hourlyData), backgroundColor: Object.keys(hourlyData).map(h => (h>=7&&h<=10)||(h>=17&&h<=20) ? A+'cc' : G+'66'), borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toLocaleString()} bookings` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: {size:10} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} }, min: 4000 }
+      }
+    }
+  });
+
+  // Vehicle preference
+  destroyChart('vehicle-pref');
+  const vPrefKeys = Object.keys(vehicleCounts);
+  const vPrefVals = vPrefKeys.map(k => vehicleCounts[k]);
+  charts['vehicle-pref'] = new Chart(document.getElementById('chart-vehicle-pref'), {
+    type: 'bar',
+    data: {
+      labels: vPrefKeys,
+      datasets: [{ label: 'Bookings', data: vPrefVals, backgroundColor: [G, B, A, R, P, '#26c6da', '#ef5350'].map(c => c+'cc'), borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toLocaleString()} bookings` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: {size:11} } },
+        y: { grid: { color: '#1f2d4530' }, ticks: { font: {size:10} } }
+      }
+    }
+  });
+}
+
+function updatePage3() { buildPage3(); }
+
+// ========== INIT ==========
+buildPage1();
+buildPage2();
+buildPage3();
+</script>
+</body>
+</html>
