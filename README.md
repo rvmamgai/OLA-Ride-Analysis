@@ -11,7 +11,7 @@ The idea was simple — take raw data, clean it, ask the right questions, and pr
 ## What I Did
 
 - Loaded and explored a dataset of 1,03,024 ride records
-- Cleaned the data in MySQL — checked for nulls, verified data types, confirmed rating ranges
+- Cleaned the data in MySQL - checked for nulls, verified data types, confirmed rating ranges
 - Wrote 10 SQL queries to extract key business insights
 - Built an interactive Power BI dashboard with 5 pages
 - Developed a Streamlit web app to display SQL results and Power BI visuals
@@ -20,18 +20,18 @@ The idea was simple — take raw data, clean it, ask the right questions, and pr
 
 ## Tools and Technologies
 
-- **MySQL Workbench** — Data storage, cleaning, and querying
-- **Power BI Desktop** — Interactive dashboard development
-- **Python** — Streamlit app development
-- **Streamlit** — Web application framework
-- **VS Code** — Code editor
-- **Git & GitHub** — Version control
+- **MySQL Workbench** - Data storage, cleaning, and querying
+- **Power BI Desktop** - Interactive dashboard development
+- **Python** - Streamlit app development
+- **Streamlit** - Web application framework
+- **VS Code** - Code editor
+- **Git & GitHub** - Version control
 
 ---
 
 ## Dataset Details
 
-- **Source:** OLA Ride Data — July 2024
+- **Source:** OLA Ride Data - July 2024
 - **Total Records:** 1,03,024 rows
 - **Total Columns:** 20
 - **Key Columns:** Booking ID, Booking Status, Vehicle Type, Ride Distance, Booking Value, Payment Method, Driver Ratings, Customer Rating, Cancellation Reasons
@@ -80,19 +80,20 @@ The idea was simple — take raw data, clean it, ask the right questions, and pr
 
 ## Project Structure
 
+```
 OLA_Project/
 │
 ├── app.py                  # Streamlit web application
 ├── requirements.txt        # Python dependencies
-├── README.md              # Project documentation
+├── README.md               # Project documentation
 │
-└── images/                # Power BI dashboard screenshots
-├── overall.jpg
-├── vehicle_type.jpg
-├── revenue.jpg
-├── cancellation.jpg
-└── ratings.jpg
-
+└── Images/                 # Power BI dashboard screenshots
+    ├── overall.jpg
+    ├── vehicle_type.jpg
+    ├── revenue.jpg
+    ├── cancellation.jpg
+    └── ratings.jpg
+```
 ---
 
 ## How to Run the App
@@ -121,4 +122,4 @@ This project was completed as part of my Data Analyst internship at Labmentix. T
 
 ---
 
-*Analyst: RAvi Mamgai | Internship: Labmentix | July 2024*
+*Analyst: RAvi Mamgai | Internship: Labmentix | April 2026*
