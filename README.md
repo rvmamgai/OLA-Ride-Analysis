@@ -20,12 +20,12 @@ The idea was simple — take raw data, clean it, ask the right questions, and pr
 
 ## Tools and Technologies
 
-- **MySQL Workbench** — data storage, cleaning, and querying
-- **Power BI Desktop** — interactive dashboard development
+- **MySQL Workbench** — Data storage, cleaning, and querying
+- **Power BI Desktop** — Interactive dashboard development
 - **Python** — Streamlit app development
-- **Streamlit** — web application framework
-- **VS Code** — code editor
-- **Git & GitHub** — version control
+- **Streamlit** — Web application framework
+- **VS Code** — Code editor
+- **Git & GitHub** — Version control
 
 ---
 
@@ -79,3 +79,46 @@ The idea was simple — take raw data, clean it, ask the right questions, and pr
 ---
 
 ## Project Structure
+
+OLA_Project/
+│
+├── app.py                  # Streamlit web application
+├── requirements.txt        # Python dependencies
+├── README.md              # Project documentation
+│
+└── images/                # Power BI dashboard screenshots
+├── overall.jpg
+├── vehicle_type.jpg
+├── revenue.jpg
+├── cancellation.jpg
+└── ratings.jpg
+
+---
+
+## How to Run the App
+
+1. Clone this repository
+2. Install dependencies: pip install -r requirements.txt
+3. Make sure MySQL is running with the ola_ride database
+4. Run the Streamlit app: streamlit run app.py
+5. Open browser at http://localhost:8501
+
+---
+
+## Business Recommendations
+
+- Deploy more drivers on Tuesdays to meet peak demand
+- Investigate and fix driver punctuality issues to reduce customer cancellations
+- Encourage UPI payments through offers since digital payments are already at 40%
+- Focus on Prime Sedan availability as it generates the most revenue
+- Implement regular vehicle maintenance checks to reduce driver cancellations
+
+---
+
+## Acknowledgement
+
+This project was completed as part of my Data Analyst internship at Labmentix. The dataset was provided by Labmentix for learning and analysis purposes.
+
+---
+
+*Analyst: RAvi Mamgai | Internship: Labmentix | July 2024*
